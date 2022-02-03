@@ -4,7 +4,7 @@ A **console-like** customized desktop.
 
 ## Preview
 
-### Screenshot
+### Screenshots
 
 ![Screenshot (Empty)](https://s2.loli.net/2022/02/02/38NVqnamgdWjpsD.png)
 
@@ -16,8 +16,8 @@ A **console-like** customized desktop.
   - List Widget showing **logs**.
 - Mid: 
   - **Everyday sentence** label.
-  - **Date and time** labels.
-  - Text Edit waiting for **user input**.
+  - **Date** label and **time** label.
+  - TextEdit waiting for **user input**.
 - Lower:
   - List Widget showing **candidates**. Updating as user input changes.
 
@@ -30,7 +30,7 @@ A **console-like** customized desktop.
 
 ### Commands
 
-| Command                           | Destination                                       |
+| Command                           | Description                                       |
 | --------------------------------- | ------------------------------------------------- |
 | "- command" or "- commands"       | Open CustomLinks.txt                              |
 | "> " + [CMD command]              | Run CMD command (reserve CMD window)              |
@@ -39,19 +39,19 @@ A **console-like** customized desktop.
 
 ### Hot Keys
 
-| Key     | Destination                                                  |
+| Key     | Description                                                  |
 | ------- | ------------------------------------------------------------ |
 | Enter   | Run current command                                          |
 | Tab     | Switch between the candidates in the list widget below       |
-| Win + D | Switch to Console Desk when it is not activated; Switch back to system desktop when activated. |
+| Win + D | Switch to Console Desk if Console Desk window is not activated; Switch to system desktop if Console Desk window is activated. |
 
 ### Add Custom Link
 
 **Either approach** is available.
 
-- Add .lnk files into **Start Menu folder** (Easier)
+- Add .lnk files into **Start Menu** folder (Easier)
 
-- **Add custom links in "CustomLinks.txt"** and **save it beside ConsoleDesk.exe**
+- Add custom links in "**CustomLinks.txt**" and save it **beside ConsoleDesk.exe**
 
   Write your links like this:
 
@@ -101,7 +101,7 @@ Pay attention to the **annotation** there and the **priority** of each function.
 
 ## Environment
 
-### Develop
+### Develop Tools
 
 Visual Studio 2015 with Qt 5.15.1 msvc 2015 x64
 
@@ -109,7 +109,7 @@ Please add OpenSSL support to Qt manually.
 
 ### Target Platform
 
-Windows 10 and higher
+Windows 10 or higher
 
 ## Using Frameworks & Libraries
 
