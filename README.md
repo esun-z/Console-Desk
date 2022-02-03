@@ -1,6 +1,6 @@
 # Console Desk
 
-A **console-like** customized desktop application.
+A **console-like** customized desktop.
 
 ## Preview
 
@@ -17,7 +17,7 @@ A **console-like** customized desktop application.
 - Mid: 
   - **Everyday sentence** label.
   - **Date and time** labels.
-  - Text Edit expecting **user input**.
+  - Text Edit waiting for **user input**.
 - Lower:
   - List Widget showing **candidates**. Updating as user input changes.
 
@@ -109,7 +109,7 @@ Please add OpenSSL support to Qt manually.
 
 ### Target Platform
 
-Windows 10 and upper
+Windows 10 and higher
 
 ## Using Frameworks & Libraries
 
