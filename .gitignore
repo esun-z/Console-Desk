@@ -54,3 +54,4 @@ Screenshot_Using.png
 *.ilk
 x64/Debug/CustomLinks.txt
 x64/Release/CustomLinks.txt
+*.opendb

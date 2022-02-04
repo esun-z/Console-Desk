@@ -12,7 +12,7 @@ void KeyListener::run() {
 	while (1) {
 		if ((KEY_DOWN(VK_LWIN) || KEY_DOWN(VK_RWIN)) && KEY_DOWN('D')) {
 			emit KeyDown();
-			Sleep(200);
+			Sleep(400);
 		}
 		Sleep(10);
 	}

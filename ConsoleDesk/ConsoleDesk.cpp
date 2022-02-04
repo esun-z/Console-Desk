@@ -46,6 +46,16 @@ void ConsoleDesk::InitTimer() {
 	connect(lftimer, SIGNAL(timeout()), this, SLOT(HandleLFTimerEvent()));
 	lftimer->start(LFTIMERTIME);
 
+	keyFreezer = new QTimer(this);
+	connect(keyFreezer, SIGNAL(timeout()), this, SLOT(KeyFreezerStop()));
+	
+}
+
+//Stop key freezer after one timeout
+void ConsoleDesk::KeyFreezerStop() {
+
+	keyFreezer->stop();
+
 }
 
 //initialize key listener
@@ -58,10 +68,21 @@ void ConsoleDesk::InitKeyListener() {
 //show foreground when win+D pressed
 void ConsoleDesk::ShowForeground() {
 	qDebug() << "Win+D Pressed";
-	Sleep(10);
+	qDebug() << keyFreezer->isActive();
+	if (keyFreezer->isActive()) {
+		return;
+	}
 	if (!isActiveWindow()) {
+		Sleep(100);
 		activateWindow();
 	}
+	else {
+		showMinimized();
+	}
+	delete keyFreezer;
+	keyFreezer = new QTimer(this);
+	connect(keyFreezer, SIGNAL(timeout()), this, SLOT(KeyFreezerStop()));
+	keyFreezer->start(400);
 }
 
 //search program links
@@ -92,6 +113,7 @@ void ConsoleDesk::ReadCustomLink() {
 	QFile customLinkFile(CUSTOMLINKFILE);
 	if (!customLinkFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		PrintLog("* Failed to read custom links.");
+		lftimer->stop();
 		return;
 	}
 	QString strName, strPath;
@@ -164,24 +186,44 @@ void ConsoleDesk::CheckInput() {
 		inStr = inStr.left(inStr.length() - 1);//remove enter
 		int sel = ui.listWidgetHint->currentRow();
 
-		if (sel >= 0) {
-			HandleCommand(inStr, candidateList.seq[sel]);
-		}
-		else {
-			HandleCommand(inStr, sel);
-		}
+		HandleCommand(inStr, candidateList.seq[sel]);
 
 		inputCheckStoper++;//To prevent infinite loop. Do it before clearing textEditInput
 		ui.textEditInput->clear();
 		ui.listWidgetHint->clear();
 		return;
 	}
+	
+	//please add customized rules here
+	//return after each rule
+
+	candidateList.name.clear();
+	ui.listWidgetHint->clear();
+
+	//skip searching if this is a special command
+	if (inStr.startsWith("-") || inStr.startsWith(">")) {
+		ui.listWidgetHint->addItem(inStr);
+		return;
+	}
+
+	//open in browser
+	if (!inStr.contains(" ") && inStr.contains(".") && !inStr.startsWith(".") && !inStr.endsWith(".")) {
+		candidateList.name << inStr;
+		candidateList.seq[candidateList.name.count() - 1] = SPSEQ_WEBSITE;
+	}
 
 	//normal text change. search the list and print hints again
-	ui.listWidgetHint->clear();
 	if (inStr.count() > 0) {
-		candidateList.name.clear();
-		candidateList = FindString(inStr, programList);
+		//scandidateList.name.clear();
+		//int i = candidateList.name.count();
+		NAMESEQ candidateProgramList = FindString(inStr, programList);
+		int numNotProgram = candidateList.name.count();
+
+		candidateList.name << candidateProgramList.name;
+		for (int i = 0; i < candidateProgramList.name.count(); ++i) {
+			candidateList.seq[i + numNotProgram] = candidateProgramList.seq[i];
+		}
+
 		ui.listWidgetHint->addItems(candidateList.name);
 		if (ui.listWidgetHint->count() > 0) {
 			ui.listWidgetHint->setCurrentRow(0);
@@ -200,6 +242,23 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 	//please add customized rules here
 	//return after each rule
 
+	//special sequence recognize
+	switch (seq) {
+	case SPSEQ_WEBSITE:
+		if (!cmd.startsWith("http", Qt::CaseInsensitive)) {
+			cmd = "http://" + cmd;
+		}
+		ShellExecuteA(NULL, "open", cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+		return;
+		//break;
+	default:
+		if (seq < 0) {
+			PrintLog("* Invalid Special Sequence. An unexpected error occured.");
+			return;
+		}
+		break;
+	}
+
 	//specific commands
 	if (cmd.startsWith("-", Qt::CaseSensitive)) {
 		cmd = cmd.right(cmd.length() - 1);
@@ -210,9 +269,26 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 				i--;
 			}
 		}
+		
+		//open command list
 		if (keyWord.at(0) == "command" || keyWord.at(0) == "commands") {
 			qDebug() << ShellExecuteA(NULL, "open", CUSTOMLINKFILE, NULL, NULL, SW_SHOWMAXIMIZED);
 		}
+
+		//exit or quit
+		if (keyWord.at(0) == "exit" || keyWord.at(0) == "quit" || keyWord.at(0) == "esc" || cmd == "escape") {
+			SendMessageA(FindWindowA(NULL, "ConsoleDesk"), WM_CLOSE, 0, 0);
+			//this solution is quite stupid but it can close the framelessWindow (background window)
+		}
+
+		//about or help
+		if (keyWord.at(0) == "about" || keyWord.at(0) == "help") {
+			ShellExecuteA(NULL, "open", "https://www.github.com/esun-z/Console-Desk", NULL, NULL, SW_SHOWMAXIMIZED);
+		}
+
+		//setting
+		
+
 		return;
 	}
 	
@@ -224,13 +300,6 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		return;
 	}
 
-	//exit, quit
-	if (cmd == "exit" || cmd == "quit" || cmd == "esc" || cmd == "escape") {
-		SendMessageA(FindWindowA(NULL,"ConsoleDesk"), WM_CLOSE, 0, 0);
-		//this solution is quite stupid but it can close the framelessWindow (background window)
-		return;
-	}
-
 	//Default Operation: run the selected program
 	if (seq >= 0) {
 		PrintLog(programList.at(seq));
@@ -239,7 +308,7 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		}
 		return;
 	}
-	//change the SW_SHOWMAXIMIZED (to SW_SHOWNORMAL) if you want
+	//change the SW_SHOWMAXIMIZED (to SW_SHOWNORMAL for example) if you want
 
 	PrintLog("* Invalid Command.");
 }

@@ -36,6 +36,8 @@
 #define MAXPROGRAMCOUNT 1024
 #define INTERNETSIGNAPI "https://sentence.iciba.com/index.php?c=dailysentence&m=getdetail&title="
 
+#define SPSEQ_WEBSITE -2
+
 struct NAMESEQ {
 	QStringList name;
 	int seq[MAXPROGRAMCOUNT];
@@ -58,11 +60,13 @@ public slots:
 	void HandleLFTimerEvent();
 	void HandleNetworkReply(QNetworkReply *reply);
 	void ShowForeground();
+	void KeyFreezerStop();
 
 private:
 
 	QTimer *timer;
 	QTimer *lftimer;
+	QTimer *keyFreezer;
 	KeyListener *keyListener;
     Ui::ConsoleDeskClass ui;
 
