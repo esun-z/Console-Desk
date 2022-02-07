@@ -154,8 +154,12 @@ void ConsoleDesk::ReadCustomLink() {
 		strName = customLinkFile.readLine();
 		strPath = customLinkFile.readLine();
 		customProgramList << strName.left(strName.length() - 1);
-		customProgramListPath << strPath.left(strPath.length() - 1);
+		if (strPath.endsWith("\n")) {
+			strPath = strPath.left(strPath.length() - 1);
+		}
+		customProgramListPath << strPath;
 	}
+	
 	customLinkFile.close();
 	qDebug() << customProgramList;
 
@@ -296,6 +300,9 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 
 	//specific commands
 	if (cmd.startsWith("-", Qt::CaseSensitive)) {
+
+		bool invalidCommand = true;
+
 		cmd = cmd.right(cmd.length() - 1);
 		QStringList keyWord = cmd.split(" ");
 		for (int i = 0; i < keyWord.count(); ++i) {
@@ -308,27 +315,32 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		//open command list
 		if (keyWord.at(0) == "command" || keyWord.at(0) == "commands") {
 			qDebug() << ShellExecuteA(NULL, "open", CUSTOMLINKFILE, NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
 		}
 
 		//exit or quit
 		if (keyWord.at(0) == "exit" || keyWord.at(0) == "quit" || keyWord.at(0) == "esc" || cmd == "escape") {
 			SendMessageA(FindWindowA(NULL, "ConsoleDesk"), WM_CLOSE, 0, 0);
 			//this solution is quite stupid but it can close the framelessWindow (background window)
+			invalidCommand = false;
 		}
 
 		//about or help
 		if (keyWord.at(0) == "about" || keyWord.at(0) == "help") {
 			ShellExecuteA(NULL, "open", "https://www.github.com/esun-z/Console-Desk", NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
 		}
 
 		//shutdown
 		if (keyWord.at(0) == "shutdown") {
 			system("shutdown -s -t 0");
+			invalidCommand = false;
 		}
 
 		//reboot
 		if (keyWord.at(0) == "reboot") {
 			system("shutdown -r -t 0");
+			invalidCommand = false;
 		}
 
 		//setting
@@ -351,8 +363,12 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 			else {
 				PrintLog("* Please attach a value (ture or false).");
 			}
+			invalidCommand = false;
 		}
 
+		if (invalidCommand) {
+			PrintLog("* Invalid Command");
+		}
 
 		return;
 	}
