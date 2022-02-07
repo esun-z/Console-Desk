@@ -53,12 +53,14 @@ public:
 	QStringList programListPath, userProgramListPath, customProgramListPath;
 	NAMESEQ candidateList;
 	QNetworkAccessManager *manager;
+	QString lastCommand;
 
 public slots:
 	void CheckInput();
 	void HandleTimerEvent();
 	void HandleLFTimerEvent();
 	void HandleNetworkReply(QNetworkReply *reply);
+	void HandleKeyListener(int spkey);
 	void ShowForeground();
 	void KeyFreezerStop();
 

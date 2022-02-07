@@ -11,8 +11,19 @@ void KeyListener::run() {
 
 	while (1) {
 		if ((KEY_DOWN(VK_LWIN) || KEY_DOWN(VK_RWIN)) && KEY_DOWN('D')) {
-			emit KeyDown();
-			Sleep(400);
+			emit KeyDown(SPKEY_WIND);
+			Sleep(STANDARDINTERVAL);
+			continue;
+		}
+		if (KEY_DOWN(VK_UP)) {
+			emit KeyDown(SPKEY_UP);
+			Sleep(SHORTINTERVAL);
+			continue;
+		}
+		if (KEY_DOWN(VK_DOWN)) {
+			emit KeyDown(SPKEY_DOWN);
+			Sleep(SHORTINTERVAL);
+			continue;
 		}
 		Sleep(10);
 	}

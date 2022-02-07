@@ -3,6 +3,13 @@
 #ifndef KEYLISTENER_H
 #define KEYLISTENER_H
 
+#define SHORTINTERVAL 150
+#define STANDARDINTERVAL 400
+
+#define SPKEY_WIND -2
+#define SPKEY_UP -3
+#define SPKEY_DOWN -4
+
 
 #include <qobject.h>
 #include <qthread.h>
@@ -18,7 +25,7 @@ protected:
 	void run();
 
 signals:
-	void KeyDown();
+	void KeyDown(int spkey);
 
 public slots:
 };

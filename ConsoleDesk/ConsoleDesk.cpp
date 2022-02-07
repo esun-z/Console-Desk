@@ -11,11 +11,6 @@ ConsoleDesk::ConsoleDesk(QWidget *parent)
 	GetSign(INTERNETSIGNAPI);
 	InitUi();
 	InitKeyListener();
-	
-	
-	//create a link in Dir:StartUp to run at startup
-	qDebug() <<STARTUPDIR + QString::fromStdString("\\ConsoleDesk.lnk");
-	QFile::link(QCoreApplication::applicationFilePath(), STARTUPDIR + QString::fromStdString("\\ConsoleDesk.lnk"));
 }
 
 //initialize connections
@@ -61,8 +56,46 @@ void ConsoleDesk::KeyFreezerStop() {
 //initialize key listener
 void ConsoleDesk::InitKeyListener() {
 	keyListener = new KeyListener();
-	connect(keyListener, SIGNAL(KeyDown()), this, SLOT(ShowForeground()));
+	connect(keyListener, SIGNAL(KeyDown(int)), this, SLOT(HandleKeyListener(int)));
 	keyListener->start();
+}
+
+//Handle KeyListener signals
+void ConsoleDesk::HandleKeyListener(int spkey) {
+
+	switch (spkey) {
+	case SPKEY_WIND:
+		ShowForeground();
+		break;
+	case SPKEY_UP:
+		if (ui.textEditInput->toPlainText().isEmpty() && ui.listWidgetLog->count() > 0) {
+			ui.textEditInput->setText(lastCommand);
+			ui.textEditInput->moveCursor(QTextCursor::End);
+			return;
+		}
+		if (ui.listWidgetHint->count() > 1) {
+			if (ui.listWidgetHint->currentRow() == -1) {
+				ui.listWidgetHint->setCurrentRow(ui.listWidgetHint->count() - 1);
+			}
+			else {
+				ui.listWidgetHint->setCurrentRow(((ui.listWidgetHint->currentRow() - 1) % ui.listWidgetHint->count() + ui.listWidgetHint->count()) % ui.listWidgetHint->count());
+			}
+		}
+		break;
+	case SPKEY_DOWN:
+		if (ui.listWidgetHint->count() > 1) {
+			if (ui.listWidgetHint->currentRow() == -1) {
+				ui.listWidgetHint->setCurrentRow(0);
+			}
+			else {
+				ui.listWidgetHint->setCurrentRow((ui.listWidgetHint->currentRow() + 1) % ui.listWidgetHint->count());
+			}
+		}
+		break;
+	default:
+		break;
+	}
+
 }
 
 //show foreground when win+D pressed
@@ -184,6 +217,7 @@ void ConsoleDesk::CheckInput() {
 	//if the last character is enter, handle the command and delete all the contents
 	if (inStr.endsWith("\n", Qt::CaseSensitive)) {
 		inStr = inStr.left(inStr.length() - 1);//remove enter
+		lastCommand = inStr;
 		int sel = ui.listWidgetHint->currentRow();
 
 		HandleCommand(inStr, candidateList.seq[sel]);
@@ -203,6 +237,7 @@ void ConsoleDesk::CheckInput() {
 	//skip searching if this is a special command
 	if (inStr.startsWith("-") || inStr.startsWith(">")) {
 		ui.listWidgetHint->addItem(inStr);
+		ui.listWidgetHint->setCurrentRow(-1);
 		return;
 	}
 
@@ -286,8 +321,38 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 			ShellExecuteA(NULL, "open", "https://www.github.com/esun-z/Console-Desk", NULL, NULL, SW_SHOWMAXIMIZED);
 		}
 
+		//shutdown
+		if (keyWord.at(0) == "shutdown") {
+			system("shutdown -s -t 0");
+		}
+
+		//reboot
+		if (keyWord.at(0) == "reboot") {
+			system("shutdown -r -t 0");
+		}
+
 		//setting
-		
+		if (keyWord.at(0) == "run-at-boot" || keyWord.at(0) == "runatboot") {
+			if (keyWord.count() > 1 && !keyWord.at(1).isEmpty()/*count at first !!*/) {
+				if (keyWord.at(1) == "1" || keyWord.at(1).contains("true",Qt::CaseInsensitive)) {
+					//create a link in Dir:StartUp to run at startup
+					qDebug() << STARTUPDIR + QString::fromStdString("\\ConsoleDesk.lnk");
+					QFile::link(QCoreApplication::applicationFilePath(), STARTUPDIR + QString::fromStdString("\\ConsoleDesk.lnk"));
+					PrintLog("- Setting: Run at boot -> true");
+				}else if (keyWord.at(1) == "0" || keyWord.at(1).contains("false", Qt::CaseInsensitive)) {
+					//remove that link file
+					QFile::remove(STARTUPDIR + QString::fromStdString("\\ConsoleDesk.lnk"));
+					PrintLog("- Setting: Run at boot -> false");
+				}
+				else {
+					PrintLog("* Please attach a value (ture or false).");
+				}
+			}
+			else {
+				PrintLog("* Please attach a value (ture or false).");
+			}
+		}
+
 
 		return;
 	}
