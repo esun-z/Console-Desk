@@ -50,9 +50,13 @@ void ConsoleDesk::InitTimer() {
 //release source files in qrc file
 void ConsoleDesk::ReleaseSourceFile() {
 	qDebug() << "release source files:";
-	QFile fEs(":/ConsoleDesk/res/es.exe");
-	qDebug() << fEs.exists();
-	qDebug() << QFile::copy("qrc:/ConsoleDesk/res/es.exe", QCoreApplication::applicationDirPath() + "/es.exe");
+	QFile rfEs(":/ConsoleDesk/res/es.exe");
+	QFile lfEs(QCoreApplication::applicationDirPath() + "/es.exe");
+	if (!lfEs.exists()) {
+		qDebug() << QFile::copy(":/ConsoleDesk/res/es.exe", QCoreApplication::applicationDirPath() + "/es.exe");
+	}
+	rfEs.close();
+	lfEs.close();
 }
 
 //Stop key freezer after one timeout
