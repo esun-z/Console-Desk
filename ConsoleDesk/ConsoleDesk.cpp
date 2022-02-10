@@ -6,6 +6,7 @@ ConsoleDesk::ConsoleDesk(QWidget *parent)
     ui.setupUi(this);
 	InitConnect();
 	InitTimer();
+	ReleaseSourceFile();
 	LoadProgramLink();
 	inputCheckStoper = 0;
 	GetSign(INTERNETSIGNAPI);
@@ -44,6 +45,14 @@ void ConsoleDesk::InitTimer() {
 	keyFreezer = new QTimer(this);
 	connect(keyFreezer, SIGNAL(timeout()), this, SLOT(KeyFreezerStop()));
 	
+}
+
+//release source files in qrc file
+void ConsoleDesk::ReleaseSourceFile() {
+	qDebug() << "release source files:";
+	QFile fEs(":/ConsoleDesk/res/es.exe");
+	qDebug() << fEs.exists();
+	qDebug() << QFile::copy("qrc:/ConsoleDesk/res/es.exe", QCoreApplication::applicationDirPath() + "/es.exe");
 }
 
 //Stop key freezer after one timeout
@@ -238,6 +247,28 @@ void ConsoleDesk::CheckInput() {
 	candidateList.name.clear();
 	ui.listWidgetHint->clear();
 
+	//search file
+	if (inStr.startsWith("-f ", Qt::CaseInsensitive) && inStr.length() >= 4) {
+		QStringList resultPath;
+		if (!FindFile(ui.textEditInput->toPlainText(), resultPath)) {
+			if (!resultPath.isEmpty()) {
+				ui.listWidgetHint->addItems(resultPath);
+				ui.listWidgetHint->setCurrentRow(0);
+				candidateList.name << resultPath;
+				for (int i = 0; i < resultPath.count(); ++i) {
+					candidateList.seq[i] = SPSEQ_LOCALFILE;
+				}
+			}
+			else {
+				ui.listWidgetHint->addItem("* No matching file.");
+			}
+		}
+		else {
+			ui.listWidgetHint->addItem("* Error in searching file. Please make sure Everything.exe is running.");
+		}
+		return;
+	}
+
 	//skip searching if this is a special command
 	if (inStr.startsWith("-") || inStr.startsWith(">")) {
 		ui.listWidgetHint->addItem(inStr);
@@ -290,6 +321,12 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		ShellExecuteA(NULL, "open", cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
 		return;
 		//break;
+	case SPSEQ_LOCALFILE:
+		if (ui.listWidgetHint->count() > 0 && ui.listWidgetHint->currentRow() > -1 && !ui.listWidgetHint->currentItem()->text().isEmpty()) {
+			ShellExecuteA(NULL, "open", ui.listWidgetHint->currentItem()->text().toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+			PrintLog("LocalFile: " + ui.listWidgetHint->currentItem()->text());
+		}
+		return;
 	default:
 		if (seq < 0) {
 			PrintLog("* Invalid Special Sequence. An unexpected error occured.");
@@ -498,6 +535,34 @@ NAMESEQ ConsoleDesk::FindString(QString str, QStringList list) {
 	}
 
 	return currentProgram;
+}
+
+//find file through es.exe (need everything running)
+bool ConsoleDesk::FindFile(QString text, QStringList &result) {
+
+	QStringList scmd;
+	text = text.right(text.length() - 3);
+	QStringList textList = text.split(" ");
+	scmd << "-sort" << "dm" << "-n" << "32" << textList;
+
+	qDebug() << "Search command:";
+	qDebug() << QCoreApplication::applicationDirPath() + "/es.exe";
+	qDebug() << scmd;
+	
+	QProcess esProc(this);
+	esProc.start(QCoreApplication::applicationDirPath() + "/es.exe", scmd);
+	qDebug() << "a";
+	esProc.waitForStarted();
+	esProc.waitForFinished();
+	QString tmpStr = esProc.readAllStandardOutput();
+
+	qDebug() << "Search result:";
+	qDebug() << tmpStr;
+
+	result = tmpStr.split("\r\n");
+	result.takeLast();
+
+	return 0;
 }
 
 //handle timer.timeout event (once per second)

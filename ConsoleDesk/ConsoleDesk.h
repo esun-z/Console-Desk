@@ -18,6 +18,7 @@
 #include <qurl.h>
 #include <qtextcodec.h>
 #include <qstandardpaths.h>
+#include <qprocess.h>
 
 #include <qlabel.h>
 #include <qpushbutton.h>
@@ -37,6 +38,7 @@
 #define INTERNETSIGNAPI "https://sentence.iciba.com/index.php?c=dailysentence&m=getdetail&title="
 
 #define SPSEQ_WEBSITE -2
+#define SPSEQ_LOCALFILE -3
 
 struct NAMESEQ {
 	QStringList name;
@@ -78,6 +80,7 @@ private:
 	void InitUi();
 	void InitTimer();
 	void InitKeyListener();
+	void ReleaseSourceFile();
 	void LoadProgramLink();
 	void ReadCustomLink();
 	void GetSign(QString url);
@@ -85,5 +88,6 @@ private:
 	void PrintLog(QString log);
 	bool FindProgramLink(const QString &filePath, QStringList &link, QStringList &path);
 	bool MergeProgramLink(QStringList &listA, QStringList &pathA, QStringList listB, QStringList pathB, bool frontFirst);
+	bool FindFile(QString text, QStringList &result);
 	NAMESEQ FindString(QString str, QStringList list);
 };
