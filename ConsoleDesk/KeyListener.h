@@ -31,4 +31,3 @@ public slots:
 };
 
 #endif //KEYLISTENER_H
-

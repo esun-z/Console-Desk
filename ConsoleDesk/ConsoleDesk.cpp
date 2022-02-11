@@ -425,7 +425,7 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 	//Default Operation: run the selected program
 	if (seq >= 0) {
 		PrintLog(programList.at(seq));
-		if ((int)ShellExecuteA(GetDesktopWindow(), "open", programListPath.at(seq).toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED) <= 32) {
+		if ((long long)ShellExecuteA(GetDesktopWindow(), "open", programListPath.at(seq).toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED) <= 32) {
 			PrintLog("* Failed to run the program.");
 		}
 		return;
@@ -555,10 +555,11 @@ bool ConsoleDesk::FindFile(QString text, QStringList &result) {
 	
 	QProcess esProc(this);
 	esProc.start(QCoreApplication::applicationDirPath() + "/es.exe", scmd);
-	qDebug() << "a";
 	esProc.waitForStarted();
 	esProc.waitForFinished();
-	QString tmpStr = esProc.readAllStandardOutput();
+	QTextCodec *codec = QTextCodec::codecForName("utf8");
+	QString tmpStr = codec->toUnicode(esProc.readAllStandardOutput());
+	//currently sync. Async will be better.
 
 	qDebug() << "Search result:";
 	qDebug() << tmpStr;
@@ -588,6 +589,7 @@ void ConsoleDesk::HandleTimerEvent() {
 
 }
 
+//handle lftimer.timeout event (once per 10 seconds)
 void ConsoleDesk::HandleLFTimerEvent() {
 
 	ReadCustomLink();
