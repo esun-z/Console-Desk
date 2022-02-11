@@ -10,6 +10,16 @@ A **console-like** customized desktop.
 
 ![Screenshot (Using)](https://s2.loli.net/2022/02/02/Z2PUiGRtCMOKfw3.png)
 
+### Features
+
+- Run installed programs.
+- Search local files.
+- Run CMD commands.
+- Open user-specified files and programs.
+- Open websites.
+- Show current date and time.
+- Show an everyday sentence when Internet connection available.
+
 ### Components
 
 - Upper: 
@@ -25,33 +35,39 @@ A **console-like** customized desktop.
 
 ### Basic
 
-1. Download the executable file in a release.
+1. Download the executable file in a [release](https://www.github.com/esun-z/Console-Desk/releases).
 2. Run it.
 
 ### Commands
 
-| Command                           | Description                                       |
-| --------------------------------- | ------------------------------------------------- |
-| "- command" or "- commands"       | Open CustomLinks.txt                              |
-| "> " + [CMD command]              | Run CMD command (reserve CMD window)              |
-| "exit", "quit", "esc" or "escape" | Close this application                            |
-| [Program Name]                    | Run the program selected in the list widget below |
+| Command                                   | Description                                                  |
+| ----------------------------------------- | ------------------------------------------------------------ |
+| "- command" or "- commands"               | Open CustomLinks.txt.                                        |
+| "- exit", "- quit", "- esc" or "- escape" | Close Console Desk.                                          |
+| "- runatboot " + "true" or "false"        | Set whether to run Console Desk at system startup. False by default. |
+| "-f " + [File Name]                       | Search local files (depending on Everything.exe running).    |
+| "> " + [CMD Command]                      | Run CMD command (reserving CMD window).                      |
+| [Program Name]                            | Run the program selected in the list widget below.           |
+| [Website Link]                            | Open a website with default browser.                         |
 
 ### Hot Keys
 
-| Key     | Description                                                  |
-| ------- | ------------------------------------------------------------ |
-| Enter   | Run current command                                          |
-| Tab     | Switch between the candidates in the list widget below       |
-| Win + D | Switch to Console Desk if Console Desk window is not activated; Switch to system desktop if Console Desk window is activated. |
+| Key       | Description                                                  |
+| --------- | ------------------------------------------------------------ |
+| Enter     | Run current command.                                         |
+| Tab       | Switch between the candidates in the list widget below.      |
+| Up / Down | Select the next / last candidate in the list widget below.   |
+| Win + D   | Switch to Console Desk if Console Desk window is not activated; Switch to system desktop if Console Desk window is activated. |
 
 ### Add Custom Link
 
 **Either approach** is available.
 
-- Add .lnk files into **Start Menu** folder (Easier)
+- Right click a program and pin it to the start menu (Easiest).
 
-- Add custom links in "**CustomLinks.txt**" and save it **beside ConsoleDesk.exe**
+- Add .lnk files into **Start Menu** folder (Easier).
+
+- Add custom links in "**CustomLinks.txt**" and save it **beside ConsoleDesk.exe**.
 
   Write your links like this:
 
@@ -63,12 +79,10 @@ A **console-like** customized desktop.
   ...
   ```
 
-  **Add an extra Enter at the end of the file.**
-
   Here is an example:
 
   ```
-  computer
+computer
   C:\Users\a\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Computer.lnk
   explorer
   C:\Users\a\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\File Explorer.lnk
@@ -80,16 +94,17 @@ A **console-like** customized desktop.
   C:\Users\a\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk
   control panel
   C:\Users\a\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Control Panel.lnk
-  
   ```
-
+  
   Change the user name if you want to copy this.
 
 Customized links in "CustomLinks.txt" have **higher priorities** among the candidates.
 
+Adding customized links starting with "-" is not recommended since it might lead to unexpected errors.
+
 ### Customize Functions
 
-Clone this project and write your own function in
+Clone this project and write your own function in:
 
 ```
 void ConsoleDesk::HandleCommand(QString cmd, int seq){
@@ -103,21 +118,21 @@ Pay attention to the **annotation** there and the **priority** of each function.
 
 ### Develop Tools
 
-Visual Studio 2015 with Qt 5.15.1 msvc 2015 x64
+Visual Studio 2015 with Qt 5.15.1 MSVC 2015 x64.
 
 Please add OpenSSL support to Qt manually.
 
 ### Target Platform
 
-Windows 10 or higher
+Windows 10 or higher.
 
 ## Using Frameworks & Libraries
 
 [Qt](https://www.qt.io/)
 
-[Open SSL](https://github.com/openssl/openssl) (Optional)
+[Open SSL](https://www.github.com/openssl/openssl) (Optional)
 
-[Qt Frameless Window DarkStyle](https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle)
+[Qt Frameless Window DarkStyle](https://www.github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle)
 
 ## Licence
 
