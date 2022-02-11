@@ -2,6 +2,8 @@
 
 A **console-like** customized desktop.
 
+**[Chinese Readme](https://www.github.com/esun-z/Console-Desk/README_ZH-CN.md)**
+
 ## Preview
 
 ### Screenshots
@@ -20,7 +22,7 @@ A **console-like** customized desktop.
 - Show current date and time.
 - Show an everyday sentence when Internet connection available.
 
-### Components
+### UI Components
 
 - Upper: 
   - List Widget showing **logs**.
@@ -44,7 +46,7 @@ A **console-like** customized desktop.
 | ----------------------------------------- | ------------------------------------------------------------ |
 | "- command" or "- commands"               | Open CustomLinks.txt.                                        |
 | "- exit", "- quit", "- esc" or "- escape" | Close Console Desk.                                          |
-| "- runatboot " + "true" or "false"        | Set whether to run Console Desk at system startup. False by default. |
+| "- runatboot " + ["true" or "false"]      | Set whether to run Console Desk at system startup. False by default. |
 | "-f " + [File Name]                       | Search local files (depending on Everything.exe running).    |
 | "> " + [CMD Command]                      | Run CMD command (reserving CMD window).                      |
 | [Program Name]                            | Run the program selected in the list widget below.           |
@@ -72,10 +74,10 @@ A **console-like** customized desktop.
   Write your links like this:
 
   ```
-  <name>
-  <absolute path>
-  <name>
-  <absolute path>
+  <name1>
+  <absolute path1>
+  <name2>
+  <absolute path2>
   ...
   ```
 
@@ -100,7 +102,7 @@ computer
 
 Customized links in "CustomLinks.txt" have **higher priorities** among the candidates.
 
-Adding customized links starting with "-" is not recommended since it might lead to unexpected errors.
+Adding customized links starting with "-" is not recommended since it might be ignored or lead to unexpected errors.
 
 ### Customize Functions
 
