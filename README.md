@@ -2,7 +2,7 @@
 
 A **console-like** customized desktop.
 
-**[Chinese Readme](https://www.github.com/esun-z/Console-Desk/README_ZH-CN.md)**
+**[Chinese Readme](https://www.github.com/esun-z/Console-Desk/blob/master/README_ZH-CN.md)**
 
 ## Preview
 
