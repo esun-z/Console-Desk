@@ -56,6 +56,7 @@ public:
 	NAMESEQ candidateList;
 	QNetworkAccessManager *manager;
 	QString lastCommand;
+	QProcess *esProc;
 
 public slots:
 	void CheckInput();
@@ -63,6 +64,7 @@ public slots:
 	void HandleLFTimerEvent();
 	void HandleNetworkReply(QNetworkReply *reply);
 	void HandleKeyListener(int spkey);
+	void HandleFindFile(int exitCode, QProcess::ExitStatus exitStatus);
 	void ShowForeground();
 	void KeyFreezerStop();
 
@@ -76,10 +78,10 @@ private:
 
 	int inputCheckStoper;
 
-	void InitConnect();
 	void InitUi();
 	void InitTimer();
 	void InitKeyListener();
+	void InitFindFile();
 	void ReleaseSourceFile();
 	void LoadProgramLink();
 	void ReadCustomLink();
@@ -88,6 +90,6 @@ private:
 	void PrintLog(QString log);
 	bool FindProgramLink(const QString &filePath, QStringList &link, QStringList &path);
 	bool MergeProgramLink(QStringList &listA, QStringList &pathA, QStringList listB, QStringList pathB, bool frontFirst);
-	bool FindFile(QString text, QStringList &result);
+	void FindFile(QString text/*, QStringList &result*/);
 	NAMESEQ FindString(QString str, QStringList list);
 };
