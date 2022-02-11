@@ -84,7 +84,7 @@ A **console-like** customized desktop.
   Here is an example:
 
   ```
-computer
+  computer
   C:\Users\a\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Computer.lnk
   explorer
   C:\Users\a\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\File Explorer.lnk
