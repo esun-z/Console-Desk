@@ -1,8 +1,8 @@
 # Console Desk
 
-A **console-like** customized desktop.
+**English** | **[中文](https://www.github.com/esun-z/Console-Desk/blob/master/README_ZH-CN.md)**
 
-**[Chinese Readme](https://www.github.com/esun-z/Console-Desk/blob/master/README_ZH-CN.md)**
+A **console-like** customized desktop.
 
 ## Preview
 

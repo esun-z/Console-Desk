@@ -1,5 +1,7 @@
 # 控制台桌面
 
+**[English](https://www.github.com/esun-z/Console-Desk/blob/master/README.md)** | **中文**
+
 一个控制台风格的自定义桌面。
 
 ## 总览
