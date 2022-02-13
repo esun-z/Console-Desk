@@ -3,15 +3,16 @@
 ConsoleDesk::ConsoleDesk(QWidget *parent)
     : QWidget(parent)
 {
-    ui.setupUi(this);
+	ReleaseSourceFile();
+	ui.setupUi(this);
 	InitUi();
 	InitTimer();
 	InitFindFile();
-	ReleaseSourceFile();
 	LoadProgramLink();
 	inputCheckStoper = 0;
 	GetSign(INTERNETSIGNAPI);
 	InitKeyListener();
+	lastCommand = "";
 }
 
 //initialize UI
@@ -37,11 +38,15 @@ void ConsoleDesk::InitTimer() {
 	lftimer->start(LFTIMERTIME);
 
 	keyFreezer = new QTimer(this);
+	keyFreezer->setSingleShot(true);
 	connect(keyFreezer, SIGNAL(timeout()), this, SLOT(KeyFreezerStop()));
 	
+	wait = new QWaitCondition();
 }
 
+//initialize file searching function
 void ConsoleDesk::InitFindFile() {
+	
 	esProc = new QProcess(this);
 	connect(esProc, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(HandleFindFile(int, QProcess::ExitStatus)));
 }
@@ -61,6 +66,7 @@ void ConsoleDesk::ReleaseSourceFile() {
 //Stop key freezer after one timeout
 void ConsoleDesk::KeyFreezerStop() {
 
+	activateWindow();
 	keyFreezer->stop();
 
 }
@@ -80,6 +86,7 @@ void ConsoleDesk::HandleKeyListener(int spkey) {
 		ShowForeground();
 		break;
 	case SPKEY_UP:
+		//if the input is empty, fill the textEdit with last command
 		if (ui.textEditInput->toPlainText().isEmpty() && ui.listWidgetLog->count() > 0) {
 			ui.textEditInput->setText(lastCommand);
 			ui.textEditInput->moveCursor(QTextCursor::End);
@@ -87,9 +94,11 @@ void ConsoleDesk::HandleKeyListener(int spkey) {
 		}
 		if (ui.listWidgetHint->count() > 1) {
 			if (ui.listWidgetHint->currentRow() == -1) {
+				//select the very last candidate if nothing is selected
 				ui.listWidgetHint->setCurrentRow(ui.listWidgetHint->count() - 1);
 			}
 			else {
+				//select the last candidate (looping)
 				ui.listWidgetHint->setCurrentRow(((ui.listWidgetHint->currentRow() - 1) % ui.listWidgetHint->count() + ui.listWidgetHint->count()) % ui.listWidgetHint->count());
 			}
 		}
@@ -97,9 +106,11 @@ void ConsoleDesk::HandleKeyListener(int spkey) {
 	case SPKEY_DOWN:
 		if (ui.listWidgetHint->count() > 1) {
 			if (ui.listWidgetHint->currentRow() == -1) {
+				//select the first candidate if nothing is selected
 				ui.listWidgetHint->setCurrentRow(0);
 			}
 			else {
+				//select the next candidate (looping)
 				ui.listWidgetHint->setCurrentRow((ui.listWidgetHint->currentRow() + 1) % ui.listWidgetHint->count());
 			}
 		}
@@ -113,21 +124,19 @@ void ConsoleDesk::HandleKeyListener(int spkey) {
 //show foreground when win+D pressed
 void ConsoleDesk::ShowForeground() {
 	qDebug() << "Win+D Pressed";
-	qDebug() << keyFreezer->isActive();
 	if (keyFreezer->isActive()) {
 		return;
 	}
+	//Sleep(STANDARDINTERVAL);
+	
+	
 	if (!isActiveWindow()) {
-		Sleep(100);
-		activateWindow();
+		keyFreezer->start(SHORTINTERVAL);
 	}
 	else {
 		showMinimized();
 	}
-	delete keyFreezer;
-	keyFreezer = new QTimer(this);
-	connect(keyFreezer, SIGNAL(timeout()), this, SLOT(KeyFreezerStop()));
-	keyFreezer->start(400);
+	//keyFreezer->start(100);
 }
 
 //search program links
@@ -181,7 +190,7 @@ void ConsoleDesk::ReadCustomLink() {
 void ConsoleDesk::GetSign(QString url) {
 
 	qDebug() << "OpenSSL support:" << QSslSocket::supportsSsl();
-	//get
+	//if this value is false, please add OpenSSL support to Qt manually.
 	QNetworkRequest request;
 	QDate date = date.currentDate();
 	request.setUrl(QUrl(QString::fromStdString(INTERNETSIGNAPI) + date.toString("yyyy-MM-dd")));
@@ -255,9 +264,7 @@ void ConsoleDesk::CheckInput() {
 		return;
 	}
 
-
 	ui.listWidgetHint->clear();
-	
 
 	//skip searching if this is a special command
 	if (inStr.startsWith("-") || inStr.startsWith(">")) {
@@ -337,6 +344,14 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 				i--;
 			}
 		}
+
+		cmd = "";
+		for (int i = 1; i < keyWord.count(); ++i) {
+			cmd += keyWord.at(i);
+			cmd += " ";
+		}
+		cmd = cmd.left(cmd.length() - 1);
+		cmd.replace("+", "%2B");
 		
 		//open command list
 		if (keyWord.at(0) == "command" || keyWord.at(0) == "commands") {
@@ -345,7 +360,7 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		}
 
 		//exit or quit
-		if (keyWord.at(0) == "exit" || keyWord.at(0) == "quit" || keyWord.at(0) == "esc" || cmd == "escape") {
+		if (keyWord.at(0) == "exit" || keyWord.at(0) == "quit" || keyWord.at(0) == "esc" || keyWord.at(0) == "escape") {
 			SendMessageA(FindWindowA(NULL, "ConsoleDesk"), WM_CLOSE, 0, 0);
 			//this solution is quite stupid but it can close the framelessWindow (background window)
 			invalidCommand = false;
@@ -369,7 +384,33 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 			invalidCommand = false;
 		}
 
-		//setting
+		//Internet search engine
+		if (keyWord.at(0) == "g" || keyWord.at(0) == "google") {
+			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_GOOGLE + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
+		}
+		if (keyWord.at(0) == "b" || keyWord.at(0) == "bing") {
+			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_BING + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
+		}
+		if (keyWord.at(0) == "yh" || keyWord.at(0) == "yahoo") {
+			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_YAHOO + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
+		}
+		if (keyWord.at(0) == "ddg" || keyWord.at(0) == "duckduckgo") {
+			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_DDG + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
+		}
+		if (keyWord.at(0) == "bd" || keyWord.at(0) == "baidu") {
+			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_BAIDU + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
+		}
+		if (keyWord.at(0) == "yd" || keyWord.at(0) == "yandex") {
+			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_YANDEX + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
+			invalidCommand = false;
+		}
+
+		//setting: run at boot
 		if (keyWord.at(0) == "run-at-boot" || keyWord.at(0) == "runatboot") {
 			if (keyWord.count() > 1 && !keyWord.at(1).isEmpty()/*count at first !!*/) {
 				if (keyWord.at(1) == "1" || keyWord.at(1).contains("true",Qt::CaseInsensitive)) {

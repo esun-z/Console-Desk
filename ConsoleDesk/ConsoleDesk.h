@@ -19,6 +19,7 @@
 #include <qtextcodec.h>
 #include <qstandardpaths.h>
 #include <qprocess.h>
+#include <qwaitcondition.h>
 
 #include <qlabel.h>
 #include <qpushbutton.h>
@@ -33,9 +34,17 @@
 #define USERPROGRAMLINKDIR QDir::homePath()+"\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs"
 #define CUSTOMLINKFILE "CustomLinks.txt"
 #define STARTUPDIR "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"
+
 #define LFTIMERTIME 10000
 #define MAXPROGRAMCOUNT 1024
+
 #define INTERNETSIGNAPI "https://sentence.iciba.com/index.php?c=dailysentence&m=getdetail&title="
+#define SEARCHENGINEAPI_GOOGLE "https://www.google.com/search?q="
+#define SEARCHENGINEAPI_BING "https://www.bing.com/search?q="
+#define SEARCHENGINEAPI_YAHOO "https://search.yahoo.com/search?p="
+#define SEARCHENGINEAPI_DDG "https://duckduckgo.com/?q="
+#define SEARCHENGINEAPI_BAIDU "https://www.baidu.com/s?wd="
+#define SEARCHENGINEAPI_YANDEX "https://www.yandex.com/search/?text="
 
 #define SPSEQ_WEBSITE -2
 #define SPSEQ_LOCALFILE -3
@@ -73,6 +82,7 @@ private:
 	QTimer *timer;
 	QTimer *lftimer;
 	QTimer *keyFreezer;
+	QWaitCondition *wait;
 	KeyListener *keyListener;
     Ui::ConsoleDeskClass ui;
 

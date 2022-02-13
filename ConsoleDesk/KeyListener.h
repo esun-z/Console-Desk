@@ -10,6 +10,7 @@
 #define SPKEY_UP -3
 #define SPKEY_DOWN -4
 
+#define MAXLISTENKEY 256
 
 #include <qobject.h>
 #include <qthread.h>
@@ -20,6 +21,10 @@ class KeyListener :public QThread {
 	Q_OBJECT
 public:
 	explicit KeyListener(QObject *parent = nullptr);
+
+private:
+	bool keyState[MAXLISTENKEY];
+	bool KEYDOWN(long long vk);
 
 protected:
 	void run();
