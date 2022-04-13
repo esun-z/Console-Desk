@@ -1,6 +1,5 @@
 
 .vs/ConsoleDesk/v14/.suo
-*.exe
 *.db
 *.aps
 *.filters
@@ -55,3 +54,8 @@ Screenshot_Using.png
 x64/Debug/CustomLinks.txt
 x64/Release/CustomLinks.txt
 *.opendb
+ConsoleDesk.exe
+package/ConsoleDesk_boxed.exe
+x64/Debug/es.exe
+x64/Release/es.exe
+package/es.exe
