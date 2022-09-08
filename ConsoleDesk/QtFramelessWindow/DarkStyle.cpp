@@ -27,11 +27,11 @@ QStyle *DarkStyle::baseStyle() const { return styleBase(); }
 
 void DarkStyle::polish(QPalette &palette) {
   // modify palette to dark
-  palette.setColor(QPalette::Window, QColor(53, 53, 53));
+  palette.setColor(QPalette::Window, QColor(53, 53, 53, 112));
   palette.setColor(QPalette::WindowText, Qt::white);
   palette.setColor(QPalette::Disabled, QPalette::WindowText,
                    QColor(127, 127, 127));
-  palette.setColor(QPalette::Base, QColor(42, 42, 42));
+  palette.setColor(QPalette::Base, QColor(42, 42, 42, 112));
   palette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
   palette.setColor(QPalette::ToolTipBase, Qt::white);
   palette.setColor(QPalette::ToolTipText, QColor(53, 53, 53));

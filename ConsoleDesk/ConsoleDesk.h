@@ -30,6 +30,8 @@
 
 #include "KeyListener.h"
 
+#include "framelesswindow.h"
+
 #define PROGRAMLINKDIR "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs"
 #define USERPROGRAMLINKDIR QDir::homePath()+"\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs"
 #define CUSTOMLINKFILE "CustomLinks.txt"
@@ -46,8 +48,31 @@
 #define SEARCHENGINEAPI_BAIDU "https://www.baidu.com/s?wd="
 #define SEARCHENGINEAPI_YANDEX "https://www.yandex.com/search/?text="
 
-#define SPSEQ_WEBSITE -2
-#define SPSEQ_LOCALFILE -3
+//#define SPSEQ_UNKNOWN -1
+//#define SPSEQ_WEBSITE -2
+//#define SPSEQ_LOCALFILE -3
+//#define SPSEQ_WEBSEARCH -4
+
+enum SPSEQ {
+	SPSEQ_UNKNOWN = -1,
+	SPSEQ_WEBSITE = -2,
+	SPSEQ_LOCALFILE = -3,
+	SPSEQ_WEBSEARCH = -4,
+	SPSEQ_COMMAND = -5
+};
+
+static QStringList WebSearchEngine = {
+	"g ", "b ", "bd ", "yh ", "yd ", "ddg "
+};
+
+enum WEBSEARCHENGINE {
+	WSE_GOOGLE,
+	WSE_BING,
+	WSE_BAIDU,
+	WSE_YAHOO,
+	WSE_YANDEX,
+	WSE_DDG
+};
 
 struct NAMESEQ {
 	QStringList name;
@@ -66,8 +91,10 @@ public:
 	QNetworkAccessManager *manager;
 	QString lastCommand;
 	QProcess *esProc;
+	FramelessWindow* flWindow;
 
 public slots:
+	
 	void CheckInput();
 	void HandleTimerEvent();
 	void HandleLFTimerEvent();
@@ -87,6 +114,7 @@ private:
     Ui::ConsoleDeskClass ui;
 
 	int inputCheckStoper;
+	int currentSearchEngine = 0;
 
 	void InitUi();
 	void InitTimer();

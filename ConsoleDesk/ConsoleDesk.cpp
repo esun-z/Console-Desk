@@ -3,6 +3,8 @@
 ConsoleDesk::ConsoleDesk(QWidget *parent)
     : QWidget(parent)
 {
+	
+	memset(candidateList.seq, 0, sizeof(candidateList.seq));
 	ReleaseSourceFile();
 	ui.setupUi(this);
 	InitUi();
@@ -13,16 +15,28 @@ ConsoleDesk::ConsoleDesk(QWidget *parent)
 	GetSign(INTERNETSIGNAPI);
 	InitKeyListener();
 	lastCommand = "";
+	
 }
+
+
 
 //initialize UI
 void ConsoleDesk::InitUi() {
 
 	ui.listWidgetLog->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	ui.listWidgetHint->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	QPalette p;
+	p.setColor(QPalette::Background, QColor(42, 42, 42, 112));
+	p.setColor(QPalette::Text, Qt::white);
+	ui.labelDate->setAutoFillBackground(true);
+	ui.labelTime->setAutoFillBackground(true);
+	ui.labelDate->setPalette(p);
+	ui.labelTime->setPalette(p);
+	
 	//ui.textEditInput->activateWindow();
 	ui.textEditInput->setFocus();
 	connect(ui.textEditInput, SIGNAL(textChanged()), this, SLOT(CheckInput()));
+
 
 }
 
@@ -82,8 +96,9 @@ void ConsoleDesk::InitKeyListener() {
 void ConsoleDesk::HandleKeyListener(int spkey) {
 
 	switch (spkey) {
-	case SPKEY_WIND:
+	case SPKEY_AWAKE:
 		ShowForeground();
+		
 		break;
 	case SPKEY_UP:
 		//if the input is empty, fill the textEdit with last command
@@ -130,11 +145,24 @@ void ConsoleDesk::ShowForeground() {
 	//Sleep(STANDARDINTERVAL);
 	
 	
-	if (!isActiveWindow()) {
+	/*if (!isActiveWindow()) {
 		keyFreezer->start(SHORTINTERVAL);
 	}
 	else {
 		showMinimized();
+	}*/
+
+	if (isHidden() || !isActiveWindow()) {
+		qDebug() << "Show window.";
+		flWindow->show();
+		show();
+		flWindow->activateWindow();
+		activateWindow();
+	}
+	else {
+		qDebug() << "Hide window";
+		flWindow->hide();
+		hide();
 	}
 	//keyFreezer->start(100);
 }
@@ -167,7 +195,15 @@ void ConsoleDesk::ReadCustomLink() {
 	QFile customLinkFile(CUSTOMLINKFILE);
 	if (!customLinkFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		PrintLog("* Failed to read custom links.");
-		lftimer->stop();
+		customLinkFile.close();
+		customLinkFile.open(QIODevice::ReadWrite);
+		customLinkFile.close();
+		if (customLinkFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			PrintLog("New custom links file is created. Type -command to edit it.");
+		}
+		else {
+			lftimer->stop();
+		}
 		return;
 	}
 	QString strName, strPath;
@@ -183,7 +219,7 @@ void ConsoleDesk::ReadCustomLink() {
 	
 	customLinkFile.close();
 	qDebug() << customProgramList;
-
+	
 }
 
 //get sign sentence from the Internet
@@ -245,7 +281,15 @@ void ConsoleDesk::CheckInput() {
 		lastCommand = inStr;
 		int sel = ui.listWidgetHint->currentRow();
 
-		HandleCommand(inStr, candidateList.seq[sel]);
+		if (candidateList.name.count() > 0) {
+			HandleCommand(inStr, candidateList.seq[sel]);
+		}
+		else if(inStr.startsWith("-")) {
+			HandleCommand(inStr, SPSEQ_COMMAND);
+		}
+		else {
+			HandleCommand(inStr, SPSEQ_UNKNOWN);
+		}
 
 		inputCheckStoper++;//To prevent infinite loop. Do it before clearing textEditInput
 		ui.textEditInput->clear();
@@ -279,6 +323,27 @@ void ConsoleDesk::CheckInput() {
 		candidateList.seq[candidateList.name.count() - 1] = SPSEQ_WEBSITE;
 	}
 
+	//WebSearch
+	/*if (inStr.startsWith("bd ") || inStr.startsWith("g ") || inStr.startsWith("g ") || inStr.startsWith("yh ") || inStr.startsWith("ddg ") || inStr.startsWith("yd ")) {
+		candidateList.name << inStr;
+		candidateList.seq[candidateList.name.count()-1] = SPSEQ_WEBSEARCH;
+	}*/
+	for (int i = 0; i < WebSearchEngine.count(); i++) {
+		if (inStr.startsWith(WebSearchEngine.at(i))) {
+			if (i < 2) {
+				candidateList.name << inStr.right(inStr.length() - 2);
+			}
+			else if (i < 5) {
+				candidateList.name << inStr.right(inStr.length() - 3);
+			}
+			else {
+				candidateList.name << inStr.right(inStr.length() - 4);
+			}
+			currentSearchEngine = i;
+			candidateList.seq[candidateList.name.count() - 1] = SPSEQ_WEBSEARCH;
+		}
+	}
+
 	//normal text change. search the list and print hints again
 	if (inStr.count() > 0) {
 
@@ -309,6 +374,7 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 	//return after each rule
 
 	//special sequence recognize
+	QString parm;
 	switch (seq) {
 	case SPSEQ_WEBSITE:
 		if (!cmd.startsWith("http", Qt::CaseInsensitive)) {
@@ -323,6 +389,34 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 			PrintLog("LocalFile: " + ui.listWidgetHint->currentItem()->text());
 		}
 		return;
+	case SPSEQ_WEBSEARCH:
+		switch (currentSearchEngine){
+		case WSE_GOOGLE:
+			parm = SEARCHENGINEAPI_GOOGLE + candidateList.name.at(0);
+			break;
+		case WSE_BING:
+			parm = SEARCHENGINEAPI_BING + candidateList.name.at(0);
+			break;
+		case WSE_YAHOO:
+			parm = SEARCHENGINEAPI_YAHOO + candidateList.name.at(0);
+			break;
+		case WSE_BAIDU:
+			parm = SEARCHENGINEAPI_BAIDU + candidateList.name.at(0);
+			break;
+		case WSE_YANDEX:
+			parm = SEARCHENGINEAPI_YANDEX + candidateList.name.at(0);
+			break;
+		case WSE_DDG:
+			parm = SEARCHENGINEAPI_DDG + candidateList.name.at(0);
+			break;
+		default:
+			PrintLog("* Invalid Search Engine.");
+			break;
+		}
+		ShellExecuteA(NULL, "open", parm.toLocal8Bit(), NULL, NULL, SW_SHOWNORMAL);
+		return;
+	case SPSEQ_COMMAND:
+		break;
 	default:
 		if (seq < 0) {
 			PrintLog("* Invalid Special Sequence. An unexpected error occured.");
@@ -355,7 +449,13 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		
 		//open command list
 		if (keyWord.at(0) == "command" || keyWord.at(0) == "commands") {
-			qDebug() << ShellExecuteA(NULL, "open", CUSTOMLINKFILE, NULL, NULL, SW_SHOWMAXIMIZED);
+			if ((int)ShellExecuteA(NULL, "open", CUSTOMLINKFILE, NULL, NULL, SW_SHOWMAXIMIZED) < 32) {
+				qDebug() << "Failed to open custom links file.";
+				QFile customLinkFile(CUSTOMLINKFILE);
+				customLinkFile.open(QIODevice::ReadWrite);
+				customLinkFile.close();
+				qDebug() << ShellExecuteA(NULL, "open", CUSTOMLINKFILE, NULL, NULL, SW_SHOWMAXIMIZED);
+			}
 			invalidCommand = false;
 		}
 
@@ -381,32 +481,6 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		//reboot
 		if (keyWord.at(0) == "reboot") {
 			system("shutdown -r -t 0");
-			invalidCommand = false;
-		}
-
-		//Internet search engine
-		if (keyWord.at(0) == "g" || keyWord.at(0) == "google") {
-			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_GOOGLE + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
-			invalidCommand = false;
-		}
-		if (keyWord.at(0) == "b" || keyWord.at(0) == "bing") {
-			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_BING + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
-			invalidCommand = false;
-		}
-		if (keyWord.at(0) == "yh" || keyWord.at(0) == "yahoo") {
-			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_YAHOO + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
-			invalidCommand = false;
-		}
-		if (keyWord.at(0) == "ddg" || keyWord.at(0) == "duckduckgo") {
-			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_DDG + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
-			invalidCommand = false;
-		}
-		if (keyWord.at(0) == "bd" || keyWord.at(0) == "baidu") {
-			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_BAIDU + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
-			invalidCommand = false;
-		}
-		if (keyWord.at(0) == "yd" || keyWord.at(0) == "yandex") {
-			ShellExecuteA(NULL, "open", SEARCHENGINEAPI_YANDEX + cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
 			invalidCommand = false;
 		}
 

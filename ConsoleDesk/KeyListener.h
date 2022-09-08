@@ -6,7 +6,7 @@
 #define SHORTINTERVAL 150
 #define STANDARDINTERVAL 400
 
-#define SPKEY_WIND -2
+#define SPKEY_AWAKE -2
 #define SPKEY_UP -3
 #define SPKEY_DOWN -4
 
