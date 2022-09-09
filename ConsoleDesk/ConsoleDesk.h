@@ -58,7 +58,8 @@ enum SPSEQ {
 	SPSEQ_WEBSITE = -2,
 	SPSEQ_LOCALFILE = -3,
 	SPSEQ_WEBSEARCH = -4,
-	SPSEQ_COMMAND = -5
+	SPSEQ_INNERCMD = -5,
+	SPSEQ_SYSCMD = -6,
 };
 
 static QStringList WebSearchEngine = {

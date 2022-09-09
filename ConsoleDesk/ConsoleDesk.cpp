@@ -285,7 +285,10 @@ void ConsoleDesk::CheckInput() {
 			HandleCommand(inStr, candidateList.seq[sel]);
 		}
 		else if(inStr.startsWith("-")) {
-			HandleCommand(inStr, SPSEQ_COMMAND);
+			HandleCommand(inStr, SPSEQ_INNERCMD);
+		}
+		else if (inStr.startsWith(">")) {
+			HandleCommand(inStr, SPSEQ_SYSCMD);
 		}
 		else {
 			HandleCommand(inStr, SPSEQ_UNKNOWN);
@@ -324,10 +327,6 @@ void ConsoleDesk::CheckInput() {
 	}
 
 	//WebSearch
-	/*if (inStr.startsWith("bd ") || inStr.startsWith("g ") || inStr.startsWith("g ") || inStr.startsWith("yh ") || inStr.startsWith("ddg ") || inStr.startsWith("yd ")) {
-		candidateList.name << inStr;
-		candidateList.seq[candidateList.name.count()-1] = SPSEQ_WEBSEARCH;
-	}*/
 	for (int i = 0; i < WebSearchEngine.count(); i++) {
 		if (inStr.startsWith(WebSearchEngine.at(i))) {
 			if (i < 2) {
@@ -415,8 +414,12 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		}
 		ShellExecuteA(NULL, "open", parm.toLocal8Bit(), NULL, NULL, SW_SHOWNORMAL);
 		return;
-	case SPSEQ_COMMAND:
+	case SPSEQ_INNERCMD:
 		break;
+	case SPSEQ_SYSCMD:
+		system("start cmd /k " + cmd.right(cmd.length() - 1).toLocal8Bit());
+		PrintLog(cmd);
+		return;
 	default:
 		if (seq < 0) {
 			PrintLog("* Invalid Special Sequence. An unexpected error occured.");
@@ -484,6 +487,11 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 			invalidCommand = false;
 		}
 
+		//lock
+		if (keyWord.at(0) == "lock") {
+			ShellExecuteA(NULL, "open", "Rundll32.exe", "user32.dll,LockWorkStation", NULL, SW_HIDE);
+		}
+
 		//setting: run at boot
 		if (keyWord.at(0) == "run-at-boot" || keyWord.at(0) == "runatboot") {
 			if (keyWord.count() > 1 && !keyWord.at(1).isEmpty()/*count at first !!*/) {
@@ -511,14 +519,6 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 			PrintLog("* Invalid Command");
 		}
 
-		return;
-	}
-	
-
-	//cmd mode
-	if (cmd.startsWith(">", Qt::CaseSensitive)) {
-		system("start cmd /k " + cmd.right(cmd.length() - 1).toLocal8Bit());
-		PrintLog(cmd);
 		return;
 	}
 

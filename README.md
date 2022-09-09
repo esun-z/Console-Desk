@@ -54,12 +54,12 @@ A **console-like** customized desktop.
 
 ### Hot Keys
 
-| Key       | Description                                                  |
-| --------- | ------------------------------------------------------------ |
-| Enter     | Run current command.                                         |
-| Tab       | Switch between the candidates in the list widget below.      |
-| Up / Down | Select the next / last candidate in the list widget below.   |
-| Win + D   | Switch to Console Desk if Console Desk window is not activated; Switch to system desktop if Console Desk window is activated. |
+| Key               | Description                                                  |
+| ----------------- | ------------------------------------------------------------ |
+| Enter             | Run current command.                                         |
+| Tab               | Switch between the candidates in the list widget below.      |
+| Up / Down         | Select the next / last candidate in the list widget below.   |
+| Shift + Caps Lock | Switch to Console Desk if Console Desk window is not activated; Hide the Console Desk window if it is activated. |
 
 ### Add Custom Link
 
