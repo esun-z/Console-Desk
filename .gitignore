@@ -78,3 +78,4 @@ x64/Debug/es.exe
 x64/Release/es.exe
 package/es.exe
 ConsoleDesk/res/es.exe
+*.exe
