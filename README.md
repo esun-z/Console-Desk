@@ -19,6 +19,8 @@ A **console-like** customized desktop.
 - Run CMD commands.
 - Open user-specified files and programs.
 - Open websites.
+- Quick access to web search engines.
+- Todo list.
 - Show current date and time.
 - Show an everyday sentence when Internet connection available.
 
@@ -42,24 +44,43 @@ A **console-like** customized desktop.
 
 ### Commands
 
-| Command                                   | Description                                                  |
-| ----------------------------------------- | ------------------------------------------------------------ |
-| "- command" or "- commands"               | Open CustomLinks.txt.                                        |
-| "- exit", "- quit", "- esc" or "- escape" | Close Console Desk.                                          |
-| "- runatboot " + ["true" or "false"]      | Set whether to run Console Desk at system startup. False by default. |
-| "-f " + [File Name]                       | Search local files (depending on Everything.exe running).    |
-| "> " + [CMD Command]                      | Run CMD command (reserving CMD window).                      |
-| [Program Name]                            | Run the program selected in the list widget below.           |
-| [Website Link]                            | Open a website with default browser.                         |
+| Command                                               | Description                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------ |
+| "- command" or "- commands"                           | Open CustomLinks.txt.                                        |
+| "- exit", "- quit", "- esc" or "- escape"             | Close Console Desk.                                          |
+| "- runatboot " + ["true" or "false"]                  | Set whether to run Console Desk at system startup. False by default. |
+| "-todo"                                               | Show the current todo list.                                  |
+| "-todo " + [something]                                | Add "something" to the todo list.                            |
+| "-todo rm " + [Index]                                 | Remove the specific item in the todo list. The index starts from 1 instead of 0. |
+| "-todo rm " + "l" + [Index]                           | Remove the specific item from the bottom. The index starts from 1 instead of 0. |
+| "-f " + [File Name]                                   | Search local files (depending on Everything.exe running).    |
+| "> " + [CMD Command]                                  | Run CMD command (reserving CMD window).                      |
+| [Web Search Engine Nickname] + " " + [Search Content] | Search through a web search engine. Available engines are shown in the list below. |
+| [Program Name]                                        | Run the program selected in the list widget below.           |
+| [Website Link]                                        | Open a website with default browser.                         |
+
+### Available Web Search Engines
+
+| Name            | Nickname |
+| --------------- | -------- |
+| Google          | g        |
+| Bing            | b        |
+| Bing Dictionary | bid      |
+| Baidu           | bd       |
+| Baidu Hanyu     | bdh      |
+| Yahoo           | yh       |
+| Yandex          | yd       |
+| DuckDuckGo      | ddg      |
 
 ### Hot Keys
 
-| Key               | Description                                                  |
-| ----------------- | ------------------------------------------------------------ |
-| Enter             | Run current command.                                         |
-| Tab               | Switch between the candidates in the list widget below.      |
-| Up / Down         | Select the next / last candidate in the list widget below.   |
-| Shift + Caps Lock | Switch to Console Desk if Console Desk window is not activated; Hide the Console Desk window if it is activated. |
+| Key                                    | Description                                                  |
+| -------------------------------------- | ------------------------------------------------------------ |
+| Enter                                  | Run current command.                                         |
+| Tab                                    | Switch between the candidates in the list widget below.      |
+| Up / Down                              | Select the next / last candidate in the list widget below.   |
+| Up (Only when the input line is empty) | Put the last command into the input line.                    |
+| Shift + Caps Lock                      | Switch to Console Desk if Console Desk window is not activated; Hide the Console Desk window if it is activated. |
 
 ### Add Custom Link
 
@@ -135,6 +156,10 @@ Windows 10 or higher.
 [Open SSL](https://www.github.com/openssl/openssl) (Optional)
 
 [Qt Frameless Window DarkStyle](https://www.github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle)
+
+## Using third-part executable files
+
+[Everything command line interface: es.exe](https://www.voidtools.com/support/everything/command_line_interface/)
 
 ## Licence
 
