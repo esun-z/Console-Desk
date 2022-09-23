@@ -1,6 +1,5 @@
 
 .vs/ConsoleDesk/v14/.suo
-*.exe
 *.db
 *.aps
 *.filters
@@ -73,3 +72,9 @@ ConsoleDesk/x64/Release/RCa18596
 ConsoleDesk/x64/Release/RCa46252
 x64/Release/preset.xml
 x64/Release/todoList.txt
+ConsoleDesk.exe
+package/ConsoleDesk_boxed.exe
+x64/Debug/es.exe
+x64/Release/es.exe
+package/es.exe
+ConsoleDesk/res/es.exe
