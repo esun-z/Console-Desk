@@ -6,6 +6,7 @@
 
 KeyListener::KeyListener(QObject *parent) : QThread(parent) {
 	memset(keyState, false, sizeof(keyState));
+	emitLimitLevel = EMITLIMITLEVEL::all;
 }
 
 //triger, only return true when the key is just pressed
@@ -59,12 +60,22 @@ void KeyListener::run() {
 			continue;
 		}
 		if (KEYDOWN(VK_UP)) {
-			emit KeyDown(SPKEY_UP);
+			if (emitLimitLevel == EMITLIMITLEVEL::awakeOnly) {
+
+			}
+			else {
+				emit KeyDown(SPKEY_UP);
+			}
 			//Sleep(SHORTINTERVAL);
 			continue;
 		}
 		if (KEYDOWN(VK_DOWN)) {
-			emit KeyDown(SPKEY_DOWN);
+			if (emitLimitLevel == EMITLIMITLEVEL::awakeOnly) {
+
+			}
+			else {
+				emit KeyDown(SPKEY_DOWN);
+			}
 			//Sleep(SHORTINTERVAL);
 			continue;
 		}

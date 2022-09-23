@@ -15,7 +15,8 @@ ConsoleDesk::ConsoleDesk(QWidget *parent)
 	GetSign(INTERNETSIGNAPI);
 	InitKeyListener();
 	lastCommand = "";
-	
+	todoFile = new QFile(TODOLISTFILE);
+	ReadTodo();
 }
 
 
@@ -102,7 +103,7 @@ void ConsoleDesk::HandleKeyListener(int spkey) {
 		break;
 	case SPKEY_UP:
 		//if the input is empty, fill the textEdit with last command
-		if (ui.textEditInput->toPlainText().isEmpty() && ui.listWidgetLog->count() > 0) {
+		if (ui.textEditInput->toPlainText().isEmpty() && ui.listWidgetLog->count() > 0 && this->isActiveWindow()/*function only when window in front*/) {
 			ui.textEditInput->setText(lastCommand);
 			ui.textEditInput->moveCursor(QTextCursor::End);
 			return;
@@ -244,6 +245,7 @@ void ConsoleDesk::HandleNetworkReply(QNetworkReply *reply) {
 	qDebug() << str;
 	qDebug() << str.contains("\"content\":\"");
 	str = str.mid(str.indexOf("\"content\":\"") + 11, str.indexOf("\"", str.indexOf("\"content\":\"") + 11) - str.indexOf("\"content\":\"") - 11);
+	str = str.replace("\\u00a0", " ");
 	ui.labelSign->setText(str);
 	//clean up
 	reply->deleteLater();
@@ -379,6 +381,7 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		if (!cmd.startsWith("http", Qt::CaseInsensitive)) {
 			cmd = "http://" + cmd;
 		}
+		PrintLog(cmd);
 		ShellExecuteA(NULL, "open", cmd.toLocal8Bit(), NULL, NULL, SW_SHOWMAXIMIZED);
 		return;
 		//break;
@@ -408,10 +411,17 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		case WSE_DDG:
 			parm = SEARCHENGINEAPI_DDG + candidateList.name.at(0);
 			break;
+		case WSE_BID:
+			parm = SEARCHENGINEAPI_BINGDICT + candidateList.name.at(0);
+			break;
+		case WSE_BDH:
+			parm = SEARCHENGINEAPI_BAIDUHANYU + candidateList.name.at(0);
+			break;
 		default:
-			PrintLog("* Invalid Search Engine.");
+			PrintLog("* Invalid Search Engine");
 			break;
 		}
+		PrintLog(parm);
 		ShellExecuteA(NULL, "open", parm.toLocal8Bit(), NULL, NULL, SW_SHOWNORMAL);
 		return;
 	case SPSEQ_INNERCMD:
@@ -422,7 +432,7 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		return;
 	default:
 		if (seq < 0) {
-			PrintLog("* Invalid Special Sequence. An unexpected error occured.");
+			PrintLog("* Invalid Command");
 			return;
 		}
 		break;
@@ -450,6 +460,65 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		cmd = cmd.left(cmd.length() - 1);
 		cmd.replace("+", "%2B");
 		
+
+		//todo function
+		
+		if (keyWord.at(0) == "todo") {
+			if (keyWord.count() > 1) {
+				//Remove todo item
+				if (keyWord.at(1) == "rm") {
+					if (keyWord.count() > 2) {
+						bool l = false;
+						bool ok;
+						if (keyWord.at(2).startsWith("l")) {
+							l = true;
+							keyWord[2] = keyWord.at(2).right(keyWord.at(2).length() - 1);
+						}
+						int ind = keyWord.at(2).toInt(&ok);
+						if (l) {
+							ind = todoList.count() - ind + 1;
+						}
+						if (ind > 0 && ind <= todoList.count() && ok) {
+							todoList.takeAt(ind - 1);
+							WriteTodo();
+							PrintLog("Todo item removed.");
+						}
+						else {
+							if (ok) {
+								PrintLog("* Index out of range.");
+							}
+							else {
+								PrintLog("* Invalid index.");
+							}
+						}
+						PrintTodo();
+					}
+					else {
+						PrintLog("* Please type the index of the item to be removed.");
+					}
+				}
+				else {
+					//Add todo item
+					QString itemStr;
+					for (int i = 1; i < keyWord.count(); i++) {
+						itemStr += keyWord.at(i);
+						itemStr += " ";
+					}
+					itemStr = itemStr.left(itemStr.length() - 1);
+					todoList << itemStr;
+					WriteTodo();
+					PrintLog("Todo item added.");
+					PrintTodo();
+					
+				}
+			}
+			else {
+				//Print todo list
+				PrintTodo();
+			}
+			invalidCommand = false;
+		}
+
 		//open command list
 		if (keyWord.at(0) == "command" || keyWord.at(0) == "commands") {
 			if ((int)ShellExecuteA(NULL, "open", CUSTOMLINKFILE, NULL, NULL, SW_SHOWMAXIMIZED) < 32) {
@@ -459,6 +528,12 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 				customLinkFile.close();
 				qDebug() << ShellExecuteA(NULL, "open", CUSTOMLINKFILE, NULL, NULL, SW_SHOWMAXIMIZED);
 			}
+			invalidCommand = false;
+		}
+
+		//clear log
+		if (keyWord.at(0) == "clear") {
+			ui.listWidgetLog->clear();
 			invalidCommand = false;
 		}
 
@@ -720,4 +795,35 @@ void ConsoleDesk::HandleLFTimerEvent() {
 	MergeProgramLink(programList, programListPath, customProgramList, customProgramListPath, false);
 	qDebug() << "LFTimer";
 
+}
+
+bool ConsoleDesk::ReadTodo() {
+	if (todoFile->open(QIODevice::ReadOnly)) {
+		QDataStream r(todoFile);
+		r >> todoList;
+		todoFile->close();
+		return true;
+	}
+	return false;
+}
+
+bool ConsoleDesk::WriteTodo() {
+	if (todoFile->open(QIODevice::WriteOnly)) {
+		QDataStream w(todoFile);
+		w << todoList;
+		todoFile->close();
+		return true;
+	}
+	return false;
+}
+
+void ConsoleDesk::PrintTodo() {
+	QString todoStr = "Todo:\n";
+	for (int i = 0; i < todoList.count(); i++) {
+		//todoStr += "\t";
+		todoStr += todoList.at(i);
+		todoStr += "\n";
+	}
+	todoStr = todoStr.left(todoStr.length() - 1);
+	PrintLog(todoStr);
 }

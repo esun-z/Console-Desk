@@ -20,7 +20,13 @@
 class KeyListener :public QThread {
 	Q_OBJECT
 public:
+
+	enum class EMITLIMITLEVEL {
+		awakeOnly,
+		all,
+	};
 	explicit KeyListener(QObject *parent = nullptr);
+	EMITLIMITLEVEL emitLimitLevel;
 
 private:
 	bool keyState[MAXLISTENKEY];

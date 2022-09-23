@@ -5,28 +5,28 @@
 
 #include <Windows.h>
 
-#include <qtimer.h>
-#include <qdatetime.h>
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qdir.h>
-#include <qfile.h>
-#include <qfileinfo.h>
-#include <QtNetwork\qnetworkaccessmanager.h>
-#include <QtNetwork\qnetworkrequest.h>
-#include <QtNetwork\qnetworkreply.h>
-#include <qurl.h>
-#include <qtextcodec.h>
-#include <qstandardpaths.h>
-#include <qprocess.h>
-#include <qwaitcondition.h>
+#include <QTimer>
+#include <QDateTime>
+#include <QString>
+#include <QStringList>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QtNetwork\QNetworkAccessManager>
+#include <QtNetwork\QNetworkRequest>
+#include <QtNetwork\QNetworkReply>
+#include <QUrl>
+#include <QTextCodec>
+#include <QStandardPaths>
+#include <QProcess>
+#include <QWaitCondition>
 
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qlistwidget.h>
-#include <qtextedit.h>
+#include <QLabel>
+#include <QPushButton>
+#include <QListWidget>
+#include <QTextEdit>
 
-#include <qdebug.h>
+#include <QDebug>
 
 #include "KeyListener.h"
 
@@ -35,6 +35,7 @@
 #define PROGRAMLINKDIR "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs"
 #define USERPROGRAMLINKDIR QDir::homePath()+"\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs"
 #define CUSTOMLINKFILE "CustomLinks.txt"
+#define TODOLISTFILE "todoList.txt"
 #define STARTUPDIR "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"
 
 #define LFTIMERTIME 10000
@@ -47,11 +48,8 @@
 #define SEARCHENGINEAPI_DDG "https://duckduckgo.com/?q="
 #define SEARCHENGINEAPI_BAIDU "https://www.baidu.com/s?wd="
 #define SEARCHENGINEAPI_YANDEX "https://www.yandex.com/search/?text="
-
-//#define SPSEQ_UNKNOWN -1
-//#define SPSEQ_WEBSITE -2
-//#define SPSEQ_LOCALFILE -3
-//#define SPSEQ_WEBSEARCH -4
+#define SEARCHENGINEAPI_BINGDICT "https://cn.bing.com/dict/search?q="
+#define SEARCHENGINEAPI_BAIDUHANYU "https://hanyu.baidu.com/s?wd="
 
 enum SPSEQ {
 	SPSEQ_UNKNOWN = -1,
@@ -60,10 +58,11 @@ enum SPSEQ {
 	SPSEQ_WEBSEARCH = -4,
 	SPSEQ_INNERCMD = -5,
 	SPSEQ_SYSCMD = -6,
+	SPSEQ_TODO = -7
 };
 
 static QStringList WebSearchEngine = {
-	"g ", "b ", "bd ", "yh ", "yd ", "ddg "
+	"g ", "b ", "bd ", "yh ", "yd ", "ddg ", "bid ", "bdh "
 };
 
 enum WEBSEARCHENGINE {
@@ -72,7 +71,9 @@ enum WEBSEARCHENGINE {
 	WSE_BAIDU,
 	WSE_YAHOO,
 	WSE_YANDEX,
-	WSE_DDG
+	WSE_DDG,
+	WSE_BID,
+	WSE_BDH
 };
 
 struct NAMESEQ {
@@ -114,6 +115,9 @@ private:
 	KeyListener *keyListener;
     Ui::ConsoleDeskClass ui;
 
+	QStringList todoList;
+	QFile* todoFile;
+
 	int inputCheckStoper;
 	int currentSearchEngine = 0;
 
@@ -131,4 +135,8 @@ private:
 	bool MergeProgramLink(QStringList &listA, QStringList &pathA, QStringList listB, QStringList pathB, bool frontFirst);
 	void FindFile(QString text/*, QStringList &result*/);
 	NAMESEQ FindString(QString str, QStringList list);
+
+	bool ReadTodo();
+	bool WriteTodo();
+	void PrintTodo();
 };
