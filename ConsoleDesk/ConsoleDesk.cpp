@@ -565,6 +565,7 @@ void ConsoleDesk::HandleCommand(QString cmd, int seq) {
 		//lock
 		if (keyWord.at(0) == "lock") {
 			ShellExecuteA(NULL, "open", "Rundll32.exe", "user32.dll,LockWorkStation", NULL, SW_HIDE);
+			invalidCommand = false;
 		}
 
 		//setting: run at boot
@@ -743,9 +744,10 @@ void ConsoleDesk::HandleFindFile(int exitCode, QProcess::ExitStatus exitStatus) 
 		ui.listWidgetLog->addItem("* Fail to search files. Please make sure Everything.exe is running.");
 		break;
 	case 0: {
-		QTextCodec *codec = QTextCodec::codecForName("utf8");
-		QString tmpStr = codec->toUnicode(esProc->readAllStandardOutput());
-		QStringList result = tmpStr.split("\r\n");
+		//QTextCodec *codec = QTextCodec::codecForName("utf8");
+		//QString tmpStr = codec->toUnicode(esProc->readAllStandardOutput());
+		//QStringList result = tmpStr.split("\r\n");
+		QStringList result = QString::fromLocal8Bit(esProc->readAllStandardOutput()).split("\r\n");
 		result.takeLast();
 
 		if (!result.isEmpty()) {
